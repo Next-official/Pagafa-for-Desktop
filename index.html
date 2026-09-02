@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagafà</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  
+  <!-- Font Fredoka -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js per i Grafici -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #F4F6F9;
+      --card: #FFFFFF;
+      --primary: #4F46E5;
+      --primary-light: #EEF2FF;
+      --income: #10B981;
+      --income-light: #ECFDF5;
+      --expense: #EF4444;
+      --expense-light: #FEF2F2;
+      --accent: #F59E0B;
+      --accent-light: #FEF3C7;
+      --text: #1F2937;
+      --subtext: #6B7280;
+      --border: #E5E7EB;
+      --radius: 20px;
+      --sidebar-width: 250px;
+    }
+
+    body.theme-indigo  { --primary: #4F46E5; --primary-light: #EEF2FF; }
+    body.theme-emerald { --primary: #059669; --primary-light: #D1FAE5; }
+    body.theme-purple  { --primary: #7C3AED; --primary-light: #EDE9FE; }
+    body.theme-rose    { --primary: #E11D48; --primary-light: #FFE4E6; }
+    body.theme-orange  { --primary: #EA580C; --primary-light: #FFEDD5; }
+    body.theme-cyan    { --primary: #0891B2; --primary-light: #CFFAFE; }
+    body.theme-pink    { --primary: #DB2777; --primary-light: #FCE7F3; }
+    body.theme-amber   { --primary: #D97706; --primary-light: #FEF3C7; }
+
+    body.theme-dark {
+      --bg: #0F172A;
+      --card: #1E293B;
+      --primary-light: #334155;
+      --text: #F8FAFC;
+      --subtext: #94A3B8;
+      --border: #334155;
+      --income-light: #064E3B;
+      --expense-light: #7F1D1D;
+      --accent-light: #78350F;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background-color 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+      position: relative;
+    }
+
+    /* Area principale contenuto */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-right: var(--sidebar-width);
+      padding: 30px 40px;
+      max-width: 1200px;
+      margin-left: auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), #3B82F6);
+      color: white;
+      padding: 24px 32px;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      transition: background 0.3s;
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .balance {
+      font-size: 2.8rem;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+      animation: fadeInUp 0.3s ease;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .card-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--subtext);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s ease, opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:active { transform: scale(0.98); }
+    .btn-income { background-color: var(--income); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+    .btn-expense { background-color: var(--expense); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
+    .btn-neutral { background-color: var(--primary); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
+    .btn-accent { background-color: var(--accent); color: #000; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+    .btn-danger { background-color: #DC2626; }
+    .btn-sm { padding: 8px 16px; font-size: 0.85rem; border-radius: 10px; width: auto; }
+
+    .section-view {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section-view.active {
+      display: flex;
+    }
+
+    /* Griglie Desktop per sezioni multiple */
+    .desktop-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .streak-card {
+      background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+      color: white;
+      border: none;
+    }
+
+    .streak-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .streak-count-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .streak-flame {
+      font-size: 3rem;
+      animation: pulseFlame 1.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseFlame {
+      0% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4)); }
+      100% { transform: scale(1.15) rotate(4deg); filter: drop-shadow(0 0 12px rgba(255, 230, 0, 0.8)); }
+    }
+
+    .streak-number {
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .streak-subtext {
+      font-size: 0.9rem;
+      opacity: 0.95;
+      font-weight: 500;
+    }
+
+    /* Grid Obiettivi in Desktop */
+    .goals-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .goal-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+
+    .goal-card.active-goal {
+      border-color: var(--primary);
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.12);
+    }
+
+    .goal-card.completed-goal {
+      border-color: var(--income);
+      background: linear-gradient(135deg, var(--card), var(--income-light));
+    }
+
+    .goal-status-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 8px;
+      text-transform: uppercase;
+    }
+
+    .status-active { background: var(--primary-light); color: var(--primary); }
+    .status-completed { background: var(--income); color: white; }
+    .status-waiting { background: var(--border); color: var(--subtext); }
+
+    .progress-bar-bg {
+      background: var(--border);
+      height: 16px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--primary), var(--income));
+      height: 100%;
+      width: 0%;
+      border-radius: 12px;
+      transition: width 0.5s ease;
+    }
+
+    /* Stemmi su 3-4 colonne in PC */
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .badge-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      opacity: 0.4;
+      filter: grayscale(0.8);
+      transition: all 0.3s ease;
+    }
+
+    .badge-card.unlocked {
+      opacity: 1;
+      filter: grayscale(0);
+      border-color: var(--accent);
+      background: linear-gradient(135deg, var(--card), var(--accent-light));
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .badge-icon {
+      font-size: 2.2rem;
+      background: var(--border);
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .badge-card.unlocked .badge-icon {
+      background: var(--card);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .badge-info h4 {
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .badge-info p {
+      font-size: 0.78rem;
+      color: var(--subtext);
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    .badge-status {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .tx-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .tx-item {
+      background: var(--card);
+      padding: 12px 16px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid var(--border);
+    }
+
+    .tx-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tx-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .tx-details strong { display: block; font-size: 0.92rem; font-weight: 600; }
+    .tx-details small { color: var(--subtext); font-size: 0.78rem; font-weight: 500; }
+
+    .tx-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tx-amount {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .amount-income { color: var(--income); }
+    .amount-expense { color: var(--expense); }
+
+    .btn-delete {
+      background: var(--border);
+      border: none;
+      color: var(--subtext);
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+      background: var(--expense-light);
+      color: var(--expense);
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--subtext);
+      padding: 24px;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .color-picker-grid {
+      display: flex;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .color-dot {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .color-dot:hover { transform: scale(1.1); }
+    .color-dot.active { border-color: var(--text); transform: scale(1.15); }
+
+    /* SIDEBAR SPOSTATA A DESTRA PER PC */
+    .tab-bar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 12px;
+      z-index: 100;
+      padding: 40px 16px;
+      box-shadow: -4px 0 15px rgba(0, 0, 0, 0.03);
+    }
+
+    .brand-logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      padding: 0 12px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 14px;
+      color: var(--subtext);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 14px 18px;
+      border-radius: 14px;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .tab-btn .tab-icon {
+      font-size: 1.3rem;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .tab-btn.active {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      padding: 16px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--card);
+      width: 100%;
+      max-width: 440px;
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      animation: fadeInUp 0.25s ease;
+    }
+
+    /* ADATTAMENTO MOBILE RESPONSIVE (Sotto i 850px di larghezza schermo) */
+    @media (max-width: 850px) {
+      .app-container { flex-direction: column; }
+      .main-wrapper { margin-right: 0; max-width: 100%; padding: 16px; }
+      header { flex-direction: column; text-align: center; gap: 8px; }
+      .desktop-grid-2 { grid-template-columns: 1fr; }
+      .goals-list { grid-template-columns: 1fr; }
+      .badges-grid { grid-template-columns: 1fr 1fr; }
+      .tab-bar {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 70px;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        border-left: none;
+        border-top: 1px solid var(--border);
+        padding: 0 8px;
+      }
+      .brand-logo { display: none; }
+      .tab-btn {
+        flex-direction: column;
+        gap: 2px;
+        font-size: 0.68rem;
+        padding: 8px;
+        justify-content: center;
+      }
+      .tab-btn.active {
+        background: transparent;
+        color: var(--primary);
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body class="theme-indigo">
+
+<div class="app-container">
+
+  <!-- Area Contenuto Principale Desktop -->
+  <div class="main-wrapper">
+    <header>
+      <div>
+        <h1>Il mio salvadanaio</h1>
+        <p style="font-size: 0.85rem; opacity: 0.8;">Gestisci i tuoi risparmi sul tuo PC</p>
+      </div>
+      <div class="balance" id="totalBalance">0,00 €</div>
+    </header>
+
+    <div class="content-area">
+      
+      <!-- SEZIONE 1: AGGIUNGI MOVIMENTO -->
+      <section id="sec-add" class="section-view active">
+        <div class="card" style="max-width: 600px; margin: 0 auto; width: 100%;">
+          <div class="card-title" style="margin-bottom: 20px;">Nuovo Movimento</div>
+          
+          <div class="form-group">
+            <label for="desc">Cosa riguarda?</label>
+            <input type="text" id="desc" placeholder="es. Paga settimanale, Gelato..."
+          </div>
+
+          <div class="form-group">
+            <label for="category">Categoria</label>
+            <select id="category">
+              <option value="🎁 Regalo/Paga">🎁 Regalo o Paga</option>
+              <option value="🍦 Cibo e Bevande">🍦 Cibo e Bevande</option>
+              <option value="🎮 Giochi e Hobby">🎮 Giochi e Hobby</option>
+              <option value="❤️ Beneficienza">❤️ Beneficienza</option>
+              <option value="🎨 Scuola">🎨 Scuola</option>
+              <option value="⭐ Altro">⭐ Altro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="amount">Importo (€)</label>
+            <input type="number" id="amount" step="0.01" inputmode="decimal" placeholder="0.00" />
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-income" onclick="addTransaction('income')">➕ Entrata</button>
+            <button class="btn btn-expense" onclick="addTransaction('expense')">➖ Uscita</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEZIONE 2: OBIETTIVI MULTIPLI -->
+      <section id="sec-goals" class="section-view">
+        <div class="card" style="padding:16px 24px;">
+          <div class="card-header-flex" style="margin-bottom:0;">
+            <div class="card-title">🎯 I Miei Obiettivi</div>
+            <button class="btn btn-accent btn-sm" onclick="openGoalModal()">➕ Nuovo Obiettivo</button>
+          </div>
+        </div>
+
+        <div id="goalsListContainer" class="goals-list">
+          <!-- Lista Obiettivi Generata Dinamicamente -->
+        </div>
+      </section>
+
+      <!-- SEZIONE 3: STEMMI -->
+      <section id="sec-badges" class="section-view">
+        <div class="card">
+          <div class="card-title">🏆 Stemmi da Sbloccare</div>
+          <p style="font-size:0.85rem; color:var(--subtext); margin-top:4px;">Raggiungi i traguardi per sbloccare tutti i trofei!</p>
+          
+          <div class="badges-grid" id="badgesContainer">
+            <!-- Generati via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SEZIONE 4: ATTIVITÀ & STREAK -->
+      <section id="sec-activity" class="section-view">
+        <div class="card streak-card">
+          <div class="streak-header">
+            <div class="streak-count-box">
+              <span class="streak-flame">🔥</span>
+              <div>
+                <div class="streak-number" id="streakDaysDisplay">0 Giorni</div>
+                <div class="streak-subtext" id="streakSubtext">Registra un'attività oggi!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disposizione su 2 Colonne su PC -->
+        <div class="desktop-grid-2">
+          <div class="card">
+            <div class="card-title">📊 Ripartizione Spese</div>
+            <div class="chart-container">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px;">📜 Cronologia</div>
+            <div style="margin-bottom: 12px;">
+              <select id="filterSelect" onchange="loadTransactions()">
+                <option value="all">Tutti i movimenti</option>
+                <option value="income">Solo Entrate</option>
+                <option value="expense">Solo Uscite</option>
+              </select>
+            </div>
+            <ul class="tx-list" id="txList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEZIONE 5: IMPOSTAZIONI & TEMI -->
+      <section id="sec-settings" class="section-view">
+        <div class="desktop-grid-2">
+          <div class="card">
+            <div class="card-title">Personalizzazione Tema</div>
+            <p style="font-size:0.85rem; color:var(--subtext); margin-top:4px;">Scegli il tuo colore preferito:</p>
+            
+            <div class="color-picker-grid">
+              <div class="color-dot active" style="background:#4F46E5;" title="Indaco" onclick="setTheme('theme-indigo', this)"></div>
+              <div class="color-dot" style="background:#059669;" title="Smeraldo" onclick="setTheme('theme-emerald', this)"></div>
+              <div class="color-dot" style="background:#7C3AED;" title="Viola" onclick="setTheme('theme-purple', this)"></div>
+              <div class="color-dot" style="background:#E11D48;" title="Rosa Cemento" onclick="setTheme('theme-rose', this)"></div>
+              <div class="color-dot" style="background:#EA580C;" title="Arancione" onclick="setTheme('theme-orange', this)"></div>
+              <div class="color-dot" style="background:#0891B2;" title="Turchese" onclick="setTheme('theme-cyan', this)"></div>
+              <div class="color-dot" style="background:#DB2777;" title="Fucsia" onclick="setTheme('theme-pink', this)"></div>
+              <div class="color-dot" style="background:#D97706;" title="Ambra" onclick="setTheme('theme-amber', this)"></div>
+            </div>
+
+            <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
+
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:600; font-size:0.95rem;">Tema Scuro (Dark Mode)</span>
+              <button class="btn btn-neutral btn-sm" onclick="toggleDarkMode()">Attiva/Disattiva</button>
+            </div>
+          </div>
+
+          <div class="card" style="display: flex; flex-direction: column; gap: 14px;">
+            <div class="card-title">Backup Dati</div>
+            <p style="font-size:0.85rem; color:var(--subtext);">
+              I tuoi dati sono salvati al sicuro all'interno del browser del tuo PC.
+            </p>
+
+            <button class="btn btn-neutral" onclick="exportData()">📥 Esporta Backup (JSON)</button>
+            
+            <label class="btn btn-neutral" style="margin-bottom:0; text-align:center;">
+              📤 Importa Backup
+              <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+            </label>
+
+            <hr style="border:0; border-top:1px solid var(--border); margin: 6px 0;">
+            
+            <button class="btn btn-danger" onclick="clearAllData()">🗑️ Cancella Tutti i Dati</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- BARRA DI NAVIGAZIONE POSIZIONATA SUL LATO DESTRO PER PC -->
+  <nav class="tab-bar">
+    <div class="brand-logo">
+      <span>Pagafà</span>
+    </div>
+    <button class="tab-btn active" onclick="switchTab('sec-add', this)">
+      <span class="tab-icon">➕</span>
+      <span>Aggiungi</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('sec-goals', this)">
+      <span class="tab-icon">🎯</span>
+      <span>Obiettivi</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('sec-badges', this)">
+      <span class="tab-icon">🏆</span>
+      <span>Stemmi</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('sec-activity', this)">
+      <span class="tab-icon">📊</span>
+      <span>Attività</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('sec-settings', this)">
+      <span class="tab-icon">⚙️</span>
+      <span>Opzioni</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- Modal Aggiungi/Modifica Obiettivo -->
+<div class="modal-backdrop" id="goalModal">
+  <div class="modal-card">
+    <div class="card-title" style="margin-bottom:14px;" id="modalGoalHeading">Aggiungi Obiettivo</div>
+    <input type="hidden" id="modalGoalId" value="" />
+    <div class="form-group">
+      <label for="modalGoalTitle">Cosa desideri?</label>
+      <input type="text" id="modalGoalTitle" placeholder="es. Bicicletta, Libro, Videogioco..." />
+    </div>
+    <div class="form-group">
+      <label for="modalGoalTarget">Quanto costa? (€)</label>
+      <input type="number" id="modalGoalTarget" step="0.01" placeholder="50.00" />
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-neutral" onclick="saveGoal()">✔️ Salva</button>
+      <button class="btn btn-danger" onclick="closeGoalModal()">🗑️ Annulla</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let db;
+  let myChart = null;
+  let goalsList = [];
+  let currentTheme = 'theme-indigo';
+  let isDark = false;
+
+  const BADGES_CONFIG = [
+    { id: 'first_saving', icon: '🌱', title: 'Primi Passi', desc: 'Effettua il tuo primo inserimento', check: (total, count, streak, completedGoals) => count >= 1 },
+    { id: 'save_20', icon: '🪙', title: 'Primi 20€', desc: 'Raggiungi un saldo di 20€', check: (total) => total >= 20 },
+    { id: 'save_50', icon: '💰', title: 'Super 50€', desc: 'Raggiungi un saldo di 50€', check: (total) => total >= 50 },
+    { id: 'save_100', icon: '🏦', title: 'Mastro Salvadanaio', desc: 'Raggiungi un saldo di 100€', check: (total) => total >= 100 },
+    { id: 'goal_reached', icon: '🎉', title: 'Primo Obiettivo!', desc: 'Completa il tuo primo obiettivo', check: (total, count, streak, completedGoals) => completedGoals >= 1 },
+    { id: 'streak_3', icon: '🔥', title: 'Fiamma Viva', desc: 'Mantieni una streak di 3 giorni', check: (total, count, streak) => streak >= 3 }
+  ];
+
+  const request = indexedDB.open("SalvadanaioDB_v6", 1);
+
+  request.onupgradeneeded = (e) => {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains("transactions")) {
+      db.createObjectStore("transactions", { keyPath: "id", autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains("goals")) {
+      db.createObjectStore("goals", { keyPath: "id", autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains("settings")) {
+      db.createObjectStore("settings", { keyPath: "key" });
+    }
+  };
+
+  request.onsuccess = (e) => {
+    db = e.target.result;
+    loadSettings();
+    loadGoals(() => {
+      loadTransactions();
+    });
+  };
+
+  function switchTab(sectionId, btn) {
+    document.querySelectorAll('.section-view').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById(sectionId).classList.add('active');
+    btn.classList.add('active');
+
+    if (sectionId === 'sec-activity') {
+      loadTransactions();
+    }
+  }
+
+  function setTheme(themeName, el) {
+    document.body.className = themeName + (isDark ? ' theme-dark' : '');
+    currentTheme = themeName;
+    if (el) {
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+      el.classList.add('active');
+    }
+    saveSettings();
+  }
+
+  function toggleDarkMode() {
+    isDark = !isDark;
+    document.body.className = currentTheme + (isDark ? ' theme-dark' : '');
+    saveSettings();
+  }
+
+  function saveSettings() {
+    if (!db) return;
+    const tx = db.transaction("settings", "readwrite");
+    tx.objectStore("settings").put({ key: "theme", value: { currentTheme, isDark } });
+  }
+
+  function loadSettings() {
+    const tx = db.transaction("settings", "readonly");
+    const store = tx.objectStore("settings");
+    
+    store.get("theme").onsuccess = (e) => {
+      if (e.target.result && e.target.result.value) {
+        currentTheme = e.target.result.value.currentTheme || 'theme-indigo';
+        isDark = !!e.target.result.value.isDark;
+        document.body.className = currentTheme + (isDark ? ' theme-dark' : '');
+        
+        document.querySelectorAll('.color-dot').forEach(d => {
+          if (d.getAttribute('onclick').includes(currentTheme)) {
+            d.classList.add('active');
+          } else {
+            d.classList.remove('active');
+          }
+        });
+      }
+    };
+  }
+
+  function loadGoals(callback) {
+    if (!db) return;
+    const tx = db.transaction("goals", "readonly");
+    const req = tx.objectStore("goals").getAll();
+
+    req.onsuccess = () => {
+      goalsList = req.result || [];
+      if (goalsList.length === 0) {
+        const defaultGoal = { title: "Il mio obiettivo", target: 50 };
+        const writeTx = db.transaction("goals", "readwrite");
+        const addReq = writeTx.objectStore("goals").add(defaultGoal);
+        writeTx.oncomplete = () => {
+          loadGoals(callback);
+        };
+        return;
+      }
+      if (callback) callback();
+    };
+  }
+
+  function openGoalModal(goalId = null) {
+    if (goalId) {
+      const goal = goalsList.find(g => g.id === goalId);
+      if (goal) {
+        document.getElementById("modalGoalHeading").textContent = "Modifica Obiettivo";
+        document.getElementById("modalGoalId").value = goal.id;
+        document.getElementById("modalGoalTitle").value = goal.title;
+        document.getElementById("modalGoalTarget").value = goal.target;
+      }
+    } else {
+      document.getElementById("modalGoalHeading").textContent = "Nuovo Obiettivo";
+      document.getElementById("modalGoalId").value = "";
+      document.getElementById("modalGoalTitle").value = "";
+      document.getElementById("modalGoalTarget").value = "";
+    }
+    document.getElementById("goalModal").classList.add("active");
+  }
+
+  function closeGoalModal() {
+    document.getElementById("goalModal").classList.remove("active");
+  }
+
+  function saveGoal() {
+    const id = document.getElementById("modalGoalId").value;
+    const title = document.getElementById("modalGoalTitle").value.trim();
+    const target = parseFloat(document.getElementById("modalGoalTarget").value);
+
+    if (!title || isNaN(target) || target <= 0) {
+      alert("Inserisci un nome e un importo valido!");
+      return;
+    }
+
+    const tx = db.transaction("goals", "readwrite");
+    const store = tx.objectStore("goals");
+
+    if (id) {
+      store.put({ id: parseInt(id), title, target });
+    } else {
+      store.add({ title, target });
+    }
+
+    tx.oncomplete = () => {
+      closeGoalModal();
+      loadGoals(() => {
+        loadTransactions();
+      });
+    };
+  }
+
+  function deleteGoal(id, title) {
+    if (confirm(`Vuoi cancellare l'obiettivo "${title}"?`)) {
+      const tx = db.transaction("goals", "readwrite");
+      tx.objectStore("goals").delete(id);
+      tx.oncomplete = () => {
+        loadGoals(() => {
+          loadTransactions();
+        });
+      };
+    }
+  }
+
+  function moveGoal(id, direction) {
+    const index = goalsList.findIndex(g => g.id === id);
+    if (index === -1) return;
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= goalsList.length) return;
+
+    const temp = goalsList[index];
+    goalsList[index] = goalsList[newIndex];
+    goalsList[newIndex] = temp;
+
+    const tx = db.transaction("goals", "readwrite");
+    const store = tx.objectStore("goals");
+    store.clear().onsuccess = () => {
+      goalsList.forEach(g => {
+        delete g.id;
+        store.add(g);
+      });
+    };
+
+    tx.oncomplete = () => {
+      loadGoals(() => {
+        loadTransactions();
+      });
+    };
+  }
+
+  function addTransaction(type) {
+    const descInput = document.getElementById("desc");
+    const categoryInput = document.getElementById("category");
+    const amountInput = document.getElementById("amount");
+
+    const description = descInput.value.trim();
+    const category = categoryInput.value;
+    const amount = parseFloat(amountInput.value);
+
+    if (!description || isNaN(amount) || amount <= 0) {
+      alert("Inserisci un testo e un importo valido!");
+      return;
+    }
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    const newTx = {
+      description: description,
+      category: category,
+      amount: amount,
+      type: type,
+      rawDate: todayStr,
+      date: new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })
+    };
+
+    const tx = db.transaction("transactions", "readwrite");
+    tx.objectStore("transactions").add(newTx);
+
+    tx.oncomplete = () => {
+      descInput.value = "";
+      amountInput.value = "";
+      loadTransactions();
+      switchTab('sec-activity', document.querySelectorAll('.tab-btn')[3]);
+    };
+  }
+
+  function deleteTransaction(id, name) {
+    if (confirm(`Vuoi davvero eliminare "${name}"?`)) {
+      const tx = db.transaction("transactions", "readwrite");
+      tx.objectStore("transactions").delete(id);
+
+      tx.oncomplete = () => {
+        loadTransactions();
+      };
+    }
+  }
+
+  function loadTransactions() {
+    if (!db) return;
+    const tx = db.transaction("transactions", "readonly");
+    const req = tx.objectStore("transactions").getAll();
+
+    req.onsuccess = () => {
+      const data = req.result;
+      const streak = calculateStreak(data);
+      renderUI(data);
+      updateStreakUI(streak, data);
+      updateMultiGoalsAndBadges(data, streak);
+      updateChart(data);
+    };
+  }
+
+  function calculateStreak(list) {
+    if (!list || list.length === 0) return 0;
+
+    const dates = [...new Set(list.map(item => item.rawDate || item.date))].sort().reverse();
+    if (dates.length === 0) return 0;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+    let streak = 0;
+    let checkDate = new Date();
+
+    if (!dates.includes(today) && !dates.includes(yesterday)) {
+      return 0;
+    }
+
+    if (dates.includes(today)) {
+      checkDate = new Date();
+    } else {
+      checkDate = new Date(Date.now() - 86400000);
+    }
+
+    while (true) {
+      const dateStr = checkDate.toISOString().slice(0, 10);
+      if (dates.includes(dateStr)) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  function updateStreakUI(streak, list) {
+    const streakDisplay = document.getElementById("streakDaysDisplay");
+    const streakSubtext = document.getElementById("streakSubtext");
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const hasToday = list.some(item => (item.rawDate || item.date) === todayStr);
+
+    streakDisplay.textContent = `${streak} ${streak === 1 ? 'Giorno' : 'Giorni'}`;
+    
+    if (hasToday) {
+      streakSubtext.textContent = "Ottimo! Hai mantenuto la fiamma oggi!";
+    } else if (streak > 0) {
+      streakSubtext.textContent = "Aggiungi una nota oggi per non spegnere la fiamma!";
+    } else {
+      streakSubtext.textContent = "Inizia oggi la tua serie di risparmio!";
+    }
+  }
+
+  function renderUI(list) {
+    const listEl = document.getElementById("txList");
+    const balanceEl = document.getElementById("totalBalance");
+    const filter = document.getElementById("filterSelect").value;
+    
+    listEl.innerHTML = "";
+    let total = 0;
+
+    list.forEach(item => {
+      if (item.type === 'income') total += item.amount;
+      else total -= item.amount;
+    });
+
+    balanceEl.textContent = `${total.toFixed(2).replace('.', ',')} €`;
+
+    let filteredList = list;
+    if (filter !== 'all') {
+      filteredList = list.filter(item => item.type === filter);
+    }
+
+    if (filteredList.length === 0) {
+      listEl.innerHTML = `<li class="empty-state">Nessuna attività registrata!</li>`;
+      return;
+    }
+
+    filteredList.slice().reverse().forEach(item => {
+      const isIncome = item.type === 'income';
+      const li = document.createElement("li");
+      li.className = "tx-item";
+      
+      const categoryIcon = item.category ? item.category.split(' ')[0] : (isIncome ? '🎁' : '🛍️');
+
+      li.innerHTML = `
+        <div class="tx-info">
+          <div class="tx-icon" style="background: ${isIncome ? 'var(--income-light)' : 'var(--expense-light)'};">
+            ${categoryIcon}
+          </div>
+          <div class="tx-details">
+            <strong>${escapeHtml(item.description)}</strong>
+            <small>${item.date} • ${item.category || 'Generico'}</small>
+          </div>
+        </div>
+        <div class="tx-actions">
+          <span class="tx-amount ${isIncome ? 'amount-income' : 'amount-expense'}">
+            ${isIncome ? '+' : '-'}${item.amount.toFixed(2)} €
+          </span>
+          <button class="btn-delete" onclick="deleteTransaction(${item.id}, '${escapeHtml(item.description)}')">🗑️</button>
+        </div>
+      `;
+      listEl.appendChild(li);
+    });
+  }
+
+  function updateMultiGoalsAndBadges(list, streak) {
+    let totalBalance = 0;
+    list.forEach(item => {
+      if (item.type === 'income') totalBalance += item.amount;
+      else totalBalance -= item.amount;
+    });
+
+    let remainingMoney = Math.max(0, totalBalance);
+    const container = document.getElementById("goalsListContainer");
+    container.innerHTML = "";
+
+    let completedGoalsCount = 0;
+
+    goalsList.forEach((goal, idx) => {
+      let allocated = 0;
+      let isCompleted = false;
+      let isActive = false;
+
+      if (remainingMoney >= goal.target) {
+        allocated = goal.target;
+        remainingMoney -= goal.target;
+        isCompleted = true;
+        completedGoalsCount++;
+      } else if (remainingMoney > 0) {
+        allocated = remainingMoney;
+        remainingMoney = 0;
+        isActive = true;
+      } else {
+        allocated = 0;
+        if (idx === 0 || (goalsList[idx - 1] && remainingMoney === 0)) {
+          const prevCompleted = idx > 0 && (goalsList.slice(0, idx).every(g => g._completed));
+          if (idx === 0 || prevCompleted) isActive = true;
+        }
+      }
+
+      goal._completed = isCompleted;
+
+      const percent = Math.min(100, (allocated / goal.target) * 100);
+      const remainingForThis = goal.target - allocated;
+
+      let cardClass = "goal-card";
+      let statusHtml = "";
+
+      if (isCompleted) {
+        cardClass += " completed-goal";
+        statusHtml = `<span class="goal-status-badge status-completed">✔️ Completato</span>`;
+      } else if (isActive) {
+        cardClass += " active-goal";
+        statusHtml = `<span class="goal-status-badge status-active">In Corso</span>`;
+      } else {
+        statusHtml = `<span class="goal-status-badge status-waiting">In Coda</span>`;
+      }
+
+      const card = document.createElement("div");
+      card.className = cardClass;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <strong style="font-size:1.05rem;">${escapeHtml(goal.title)}</strong>
+            ${statusHtml}
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button class="btn-delete" style="width:28px; height:28px; font-size:0.75rem;" onclick="moveGoal(${goal.id}, -1)">⬆</button>
+            <button class="btn-delete" style="width:28px; height:28px; font-size:0.75rem;" onclick="moveGoal(${goal.id}, 1)">⬇</button>
+            <button class="btn-delete" style="width:28px; height:28px; font-size:0.75rem;" onclick="openGoalModal(${goal.id})">✏</button>
+            <button class="btn-delete" style="width:28px; height:28px; font-size:0.75rem;" onclick="deleteGoal(${goal.id}, '${escapeHtml(goal.title)}')">🗑️</button>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; font-weight:700;">
+          <span style="color:var(--subtext);">${allocated.toFixed(2)} € di ${goal.target.toFixed(2)} €</span>
+          <span style="color:var(--primary);">${percent.toFixed(0)}%</span>
+        </div>
+
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width: ${percent}%;"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--subtext); font-weight:600;">
+          <span>${isCompleted ? '🎉 Obiettivo raggiunto!' : `Mancano ${remainingForThis.toFixed(2)} €`}</span>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+
+    const badgesContainer = document.getElementById("badgesContainer");
+    badgesContainer.innerHTML = "";
+
+    BADGES_CONFIG.forEach(b => {
+      const isUnlocked = b.check(totalBalance, list.length, streak, completedGoalsCount);
+      const card = document.createElement("div");
+      card.className = `badge-card ${isUnlocked ? 'unlocked' : ''}`;
+      card.innerHTML = `
+        <div class="badge-icon">${b.icon}</div>
+        <div class="badge-info">
+          <h4>${b.title}</h4>
+          <p>${b.desc}</p>
+          ${isUnlocked ? '<div class="badge-status">Sbloccato!</div>' : ''}
+        </div>
+      `;
+      badgesContainer.appendChild(card);
+    });
+  }
+
+  function updateChart(list) {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+
+    const categoryTotals = {};
+    list.filter(item => item.type === 'expense').forEach(item => {
+      const cat = item.category || '⭐ Altro';
+      categoryTotals[cat] = (categoryTotals[cat] || 0) + item.amount;
+    });
+
+    const labels = Object.keys(categoryTotals);
+    const dataValues = Object.values(categoryTotals);
+
+    if (myChart) myChart.destroy();
+
+    if (labels.length === 0) {
+      myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Nessuna spesa'],
+          datasets: [{ data: [1], backgroundColor: ['#E5E7EB'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+      return;
+    }
+
+    myChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: dataValues,
+          backgroundColor: ['#EF4444', '#F59E0B', '#10B981', '#6366F1', '#EC4899', '#8B5CF6'],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { font: { family: 'Fredoka', size: 12 }, padding: 12 }
+          }
+        }
+      }
+    });
+  }
+
+  function exportData() {
+    const tx = db.transaction(["transactions", "goals"], "readonly");
+    const exportObject = {};
+
+    tx.objectStore("transactions").getAll().onsuccess = (e) => {
+      exportObject.transactions = e.target.result;
+      tx.objectStore("goals").getAll().onsuccess = (e2) => {
+        exportObject.goals = e2.target.result;
+        
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObject));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `salvadanaio_backup_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+      };
+    };
+  }
+
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        
+        const tx = db.transaction(["transactions", "goals"], "readwrite");
+        
+        if (importedData.transactions && Array.isArray(importedData.transactions)) {
+          const txStore = tx.objectStore("transactions");
+          txStore.clear();
+          importedData.transactions.forEach(item => {
+            delete item.id;
+            txStore.add(item);
+          });
+        }
+
+        if (importedData.goals && Array.isArray(importedData.goals)) {
+          const goalStore = tx.objectStore("goals");
+          goalStore.clear();
+          importedData.goals.forEach(item => {
+            delete item.id;
+            goalStore.add(item);
+          });
+        }
+
+        tx.oncomplete = () => {
+          alert("Backup ripristinato con successo.");
+          loadGoals(() => {
+            loadTransactions();
+          });
+        };
+      } catch (err) {
+        alert("File di backup non è valido");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function clearAllData() {
+    if (confirm("Sei sicuro di voler cancellare tutti i dati inseriti? L'azione non è reversibile.")) {
+      const tx = db.transaction(["transactions", "goals"], "readwrite");
+      tx.objectStore("transactions").clear();
+      tx.objectStore("goals").clear();
+      
+      tx.oncomplete = () => {
+        loadGoals(() => {
+          loadTransactions();
+          alert("Salvadanaio svuotato con successo.");
+        });
+      };
+    }
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/[&<"']/g, function(m) {
+      return { '&': '&amp;', '<': '&lt;', '"': '&quot;', "'": '&#039;' }[m];
+    });
+  }
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+  }
+</script>
+</body>
+</html>
