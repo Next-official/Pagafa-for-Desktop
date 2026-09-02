@@ -2,19 +2,15 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Pagafà</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.png">
   
-  <!-- Font Fredoka -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Chart.js per i Grafici -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
@@ -32,8 +28,8 @@
       --text: #1F2937;
       --subtext: #6B7280;
       --border: #E5E7EB;
-      --radius: 20px;
-      --sidebar-width: 250px;
+      --radius: 12px;
+      --fire: #FF5722;
     }
 
     body.theme-indigo  { --primary: #4F46E5; --primary-light: #EEF2FF; }
@@ -62,50 +58,45 @@
       margin: 0;
       padding: 0;
       font-family: 'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html, body {
-      height: 100%;
-      width: 100%;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
       background-color: var(--bg);
       color: var(--text);
       transition: background-color 0.3s, color 0.3s;
-      overflow-x: hidden;
+      font-size: 12px;
+    }
+
+    body {
+      display: flex;
     }
 
     .app-container {
-      display: flex;
-      min-height: 100vh;
-      width: 100%;
-      position: relative;
-    }
-
-    /* Area principale contenuto */
-    .main-wrapper {
-      flex: 1;
+      width: 100vw;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      margin-right: var(--sidebar-width);
-      padding: 30px 40px;
-      max-width: 1200px;
-      margin-left: auto;
+      background: var(--bg);
+      position: relative;
     }
 
     header {
       background: linear-gradient(135deg, var(--primary), #3B82F6);
       color: white;
-      padding: 24px 32px;
-      border-radius: var(--radius);
-      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
+      padding: 8px 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      flex-shrink: 0;
+      z-index: 10;
       transition: background 0.3s;
     }
 
     header h1 {
-      font-size: 1.2rem;
+      font-size: 0.65rem;
       font-weight: 500;
       opacity: 0.9;
       text-transform: uppercase;
@@ -113,25 +104,29 @@
     }
 
     .balance {
-      font-size: 2.8rem;
+      font-size: 1.3rem;
       font-weight: 700;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 1px;
     }
 
     .content-area {
       flex: 1;
+      overflow-y: auto;
+      padding: 8px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 8px;
+      padding-bottom: 60px;
+      -webkit-overflow-scrolling: touch;
     }
 
     .card {
       background: var(--card);
-      padding: 24px;
+      padding: 10px;
       border-radius: var(--radius);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
       border: 1px solid var(--border);
-      animation: fadeInUp 0.3s ease;
+      animation: fadeInUp 0.2s ease;
       transition: background 0.3s, border-color 0.3s;
     }
 
@@ -139,35 +134,35 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 6px;
     }
 
     .card-title {
-      font-size: 1.2rem;
+      font-size: 0.82rem;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
     }
 
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 6px;
     }
 
     label {
       display: block;
-      font-size: 0.88rem;
+      font-size: 0.68rem;
       font-weight: 600;
-      margin-bottom: 6px;
+      margin-bottom: 2px;
       color: var(--subtext);
     }
 
     input, select {
       width: 100%;
-      padding: 12px 14px;
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      font-size: 0.95rem;
+      padding: 6px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.78rem;
       font-weight: 500;
       background: var(--card);
       color: var(--text);
@@ -177,59 +172,50 @@
 
     input:focus, select:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
     .btn-group {
       display: flex;
-      gap: 12px;
-      margin-top: 14px;
+      gap: 6px;
+      margin-top: 6px;
     }
 
     .btn {
       width: 100%;
-      padding: 13px;
+      padding: 6px 8px;
       border: none;
-      border-radius: 14px;
-      font-size: 0.95rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
       font-weight: 700;
       color: white;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 4px;
       transition: transform 0.15s ease, opacity 0.2s;
     }
 
-    .btn:hover { opacity: 0.9; }
-    .btn:active { transform: scale(0.98); }
-    .btn-income { background-color: var(--income); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
-    .btn-expense { background-color: var(--expense); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
-    .btn-neutral { background-color: var(--primary); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
-    .btn-accent { background-color: var(--accent); color: #000; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+    .btn:active { transform: scale(0.97); }
+    .btn-income { background-color: var(--income); }
+    .btn-expense { background-color: var(--expense); }
+    .btn-neutral { background-color: var(--primary); }
+    .btn-accent { background-color: var(--accent); color: #000; }
     .btn-danger { background-color: #DC2626; }
-    .btn-sm { padding: 8px 16px; font-size: 0.85rem; border-radius: 10px; width: auto; }
+    .btn-sm { padding: 4px 8px; font-size: 0.68rem; border-radius: 6px; width: auto; }
 
     .section-view {
       display: none;
       flex-direction: column;
-      gap: 20px;
+      gap: 8px;
     }
 
     .section-view.active {
       display: flex;
     }
 
-    /* Griglie Desktop per sezioni multiple */
-    .desktop-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -237,6 +223,7 @@
       background: linear-gradient(135deg, #FF6B6B, #FF8E53);
       color: white;
       border: none;
+      padding: 8px 12px;
     }
 
     .streak-header {
@@ -248,50 +235,47 @@
     .streak-count-box {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 6px;
     }
 
     .streak-flame {
-      font-size: 3rem;
+      font-size: 1.5rem;
       animation: pulseFlame 1.5s infinite alternate ease-in-out;
     }
 
     @keyframes pulseFlame {
-      0% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4)); }
-      100% { transform: scale(1.15) rotate(4deg); filter: drop-shadow(0 0 12px rgba(255, 230, 0, 0.8)); }
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
     }
 
     .streak-number {
-      font-size: 2.2rem;
+      font-size: 1.1rem;
       font-weight: 700;
       line-height: 1;
     }
 
     .streak-subtext {
-      font-size: 0.9rem;
-      opacity: 0.95;
+      font-size: 0.65rem;
+      opacity: 0.9;
       font-weight: 500;
     }
 
-    /* Grid Obiettivi in Desktop */
     .goals-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .goal-card {
       background: var(--card);
-      border: 2px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: var(--radius);
-      padding: 18px;
+      padding: 8px;
       position: relative;
-      transition: border-color 0.3s;
     }
 
     .goal-card.active-goal {
       border-color: var(--primary);
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.12);
     }
 
     .goal-card.completed-goal {
@@ -300,10 +284,10 @@
     }
 
     .goal-status-badge {
-      font-size: 0.7rem;
+      font-size: 0.58rem;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 8px;
+      padding: 1px 4px;
+      border-radius: 4px;
       text-transform: uppercase;
     }
 
@@ -313,39 +297,37 @@
 
     .progress-bar-bg {
       background: var(--border);
-      height: 16px;
-      border-radius: 12px;
+      height: 8px;
+      border-radius: 4px;
       overflow: hidden;
-      margin: 12px 0;
+      margin: 4px 0;
     }
 
     .progress-bar-fill {
       background: linear-gradient(90deg, var(--primary), var(--income));
       height: 100%;
       width: 0%;
-      border-radius: 12px;
-      transition: width 0.5s ease;
+      border-radius: 4px;
+      transition: width 0.4s ease;
     }
 
-    /* Stemmi su 3-4 colonne in PC */
     .badges-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
-      margin-top: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 6px;
+      margin-top: 4px;
     }
 
     .badge-card {
       background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 6px;
       opacity: 0.4;
       filter: grayscale(0.8);
-      transition: all 0.3s ease;
     }
 
     .badge-card.unlocked {
@@ -353,60 +335,49 @@
       filter: grayscale(0);
       border-color: var(--accent);
       background: linear-gradient(135deg, var(--card), var(--accent-light));
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
-      transform: translateY(-2px);
     }
 
     .badge-icon {
-      font-size: 2.2rem;
+      font-size: 1.2rem;
       background: var(--border);
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
-    .badge-card.unlocked .badge-icon {
-      background: var(--card);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
     .badge-info h4 {
-      font-size: 0.92rem;
+      font-size: 0.7rem;
       font-weight: 700;
     }
 
     .badge-info p {
-      font-size: 0.78rem;
+      font-size: 0.58rem;
       color: var(--subtext);
-      line-height: 1.2;
-      margin-top: 2px;
+      line-height: 1.1;
     }
 
     .badge-status {
-      font-size: 0.68rem;
+      font-size: 0.55rem;
       font-weight: 700;
       color: var(--accent);
       text-transform: uppercase;
-      margin-top: 4px;
     }
 
     .tx-list {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      max-height: 400px;
-      overflow-y: auto;
+      gap: 4px;
     }
 
     .tx-item {
       background: var(--card);
-      padding: 12px 16px;
-      border-radius: 16px;
+      padding: 6px 8px;
+      border-radius: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -416,31 +387,31 @@
     .tx-info {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 6px;
     }
 
     .tx-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 0.82rem;
       flex-shrink: 0;
     }
 
-    .tx-details strong { display: block; font-size: 0.92rem; font-weight: 600; }
-    .tx-details small { color: var(--subtext); font-size: 0.78rem; font-weight: 500; }
+    .tx-details strong { display: block; font-size: 0.72rem; font-weight: 600; }
+    .tx-details small { color: var(--subtext); font-size: 0.62rem; }
 
     .tx-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 4px;
     }
 
     .tx-amount {
-      font-size: 1rem;
+      font-size: 0.75rem;
       font-weight: 700;
     }
 
@@ -451,114 +422,82 @@
       background: var(--border);
       border: none;
       color: var(--subtext);
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
+      font-size: 0.65rem;
       cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-delete:hover {
-      background: var(--expense-light);
-      color: var(--expense);
     }
 
     .empty-state {
       text-align: center;
       color: var(--subtext);
-      padding: 24px;
-      font-weight: 500;
-      font-size: 0.9rem;
+      padding: 10px;
+      font-size: 0.72rem;
     }
 
     .color-picker-grid {
-      display: flex;
-      gap: 14px;
-      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(26px, 1fr));
+      gap: 6px;
+      margin-top: 6px;
     }
 
     .color-dot {
-      width: 44px;
-      height: 44px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       cursor: pointer;
-      border: 3px solid transparent;
-      transition: transform 0.2s, border-color 0.2s;
+      border: 2px solid transparent;
+      margin: 0 auto;
     }
 
-    .color-dot:hover { transform: scale(1.1); }
-    .color-dot.active { border-color: var(--text); transform: scale(1.15); }
+    .color-dot.active { border-color: var(--text); transform: scale(1.1); }
 
-    /* SIDEBAR SPOSTATA A DESTRA PER PC */
     .tab-bar {
-      position: fixed;
-      top: 0;
+      position: absolute;
+      bottom: 0;
+      left: 0;
       right: 0;
-      width: var(--sidebar-width);
-      height: 100vh;
+      height: 50px;
       background: var(--card);
-      border-left: 1px solid var(--border);
+      border-top: 1px solid var(--border);
       display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      gap: 12px;
-      z-index: 100;
-      padding: 40px 16px;
-      box-shadow: -4px 0 15px rgba(0, 0, 0, 0.03);
-    }
-
-    .brand-logo {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--primary);
-      padding: 0 12px 20px 12px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 10px;
-      display: flex;
+      justify-content: space-around;
       align-items: center;
-      gap: 10px;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     .tab-btn {
       background: none;
       border: none;
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       align-items: center;
-      gap: 14px;
+      gap: 1px;
       color: var(--subtext);
-      font-size: 0.95rem;
+      font-size: 0.58rem;
       font-weight: 600;
       cursor: pointer;
-      padding: 14px 18px;
-      border-radius: 14px;
-      transition: all 0.2s ease;
-      width: 100%;
+      flex: 1;
     }
 
     .tab-btn .tab-icon {
-      font-size: 1.3rem;
-    }
-
-    .tab-btn:hover {
-      background-color: var(--primary-light);
-      color: var(--primary);
+      font-size: 0.95rem;
     }
 
     .tab-btn.active {
-      background-color: var(--primary);
-      color: white;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+      color: var(--primary);
     }
 
     .chart-container {
       position: relative;
       width: 100%;
-      height: 260px;
+      height: 130px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -568,62 +507,101 @@
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(2px);
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 200;
-      padding: 16px;
+      padding: 10px;
     }
 
-    .modal-backdrop.active {
-      display: flex;
-    }
+    .modal-backdrop.active { display: flex; }
 
     .modal-card {
       background: var(--card);
       width: 100%;
-      max-width: 440px;
+      max-width: 300px;
       border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      animation: fadeInUp 0.25s ease;
+      padding: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
 
-    /* ADATTAMENTO MOBILE RESPONSIVE (Sotto i 850px di larghezza schermo) */
-    @media (max-width: 850px) {
-      .app-container { flex-direction: column; }
-      .main-wrapper { margin-right: 0; max-width: 100%; padding: 16px; }
-      header { flex-direction: column; text-align: center; gap: 8px; }
-      .desktop-grid-2 { grid-template-columns: 1fr; }
-      .goals-list { grid-template-columns: 1fr; }
-      .badges-grid { grid-template-columns: 1fr 1fr; }
-      .tab-bar {
-        top: auto;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: 70px;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-        border-left: none;
-        border-top: 1px solid var(--border);
-        padding: 0 8px;
+    @media (min-width: 768px) {
+      body {
+        padding: 0;
       }
-      .brand-logo { display: none; }
-      .tab-btn {
-        flex-direction: column;
-        gap: 2px;
-        font-size: 0.68rem;
-        padding: 8px;
-        justify-content: center;
-      }
-      .tab-btn.active {
-        background: transparent;
-        color: var(--primary);
+
+      .app-container {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
         box-shadow: none;
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+          "header header"
+          "sidebar content";
+      }
+
+      header {
+        grid-area: header;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 16px;
+        text-align: left;
+      }
+
+      header h1 { font-size: 0.8rem; }
+      .balance { font-size: 1.4rem; }
+
+      .tab-bar {
+        grid-area: sidebar;
+        position: relative;
+        height: 100%;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 4px;
+        padding: 10px 8px;
+        border-top: none;
+        border-right: 1px solid var(--border);
+      }
+
+      .tab-btn {
+        flex-direction: row;
+        width: 100%;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        justify-content: flex-start;
+        gap: 8px;
+        flex: initial;
+      }
+
+      .tab-btn.active { background-color: var(--primary-light); }
+
+      .content-area {
+        grid-area: content;
+        padding: 12px;
+        padding-bottom: 12px;
+        max-width: 100%;
+        margin: 0;
+        width: 100%;
+      }
+
+      #sec-activity.active {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+      }
+
+      #sec-activity .streak-card {
+        grid-column: span 2;
+      }
+
+      .chart-container {
+        height: 140px;
       }
     }
   </style>
@@ -631,170 +609,12 @@
 <body class="theme-indigo">
 
 <div class="app-container">
+  <header>
+    <h1>Il mio salvadanaio</h1>
+    <div class="balance" id="totalBalance">0,00 €</div>
+  </header>
 
-  <!-- Area Contenuto Principale Desktop -->
-  <div class="main-wrapper">
-    <header>
-      <div>
-        <h1>Il mio salvadanaio</h1>
-        <p style="font-size: 0.85rem; opacity: 0.8;">Gestisci i tuoi risparmi sul tuo PC</p>
-      </div>
-      <div class="balance" id="totalBalance">0,00 €</div>
-    </header>
-
-    <div class="content-area">
-      
-      <!-- SEZIONE 1: AGGIUNGI MOVIMENTO -->
-      <section id="sec-add" class="section-view active">
-        <div class="card" style="max-width: 600px; margin: 0 auto; width: 100%;">
-          <div class="card-title" style="margin-bottom: 20px;">Nuovo Movimento</div>
-          
-          <div class="form-group">
-            <label for="desc">Cosa riguarda?</label>
-            <input type="text" id="desc" placeholder="es. Paga settimanale, Gelato..." />
-          </div>
-
-          <div class="form-group">
-            <label for="category">Categoria</label>
-            <select id="category">
-              <option value="🎁 Regalo/Paga">🎁 Regalo o Paghetta</option>
-              <option value="🍦 Cibo e Bevande">🍦 Cibo e Bevande</option>
-              <option value="🎮 Giochi e Hobby">🎮 Giochi e Hobby</option>
-              <option value="❤️ Beneficienza">❤️ Beneficienza</option>
-              <option value="🎨 Scuola">🎨 Scuola</option>
-              <option value="⭐ Altro">⭐ Altro</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="amount">Importo (€)</label>
-            <input type="number" id="amount" step="0.01" inputmode="decimal" placeholder="0.00" />
-          </div>
-
-          <div class="btn-group">
-            <button class="btn btn-income" onclick="addTransaction('income')">➕ Entrata</button>
-            <button class="btn btn-expense" onclick="addTransaction('expense')">➖ Uscita</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- SEZIONE 2: OBIETTIVI MULTIPLI -->
-      <section id="sec-goals" class="section-view">
-        <div class="card" style="padding:16px 24px;">
-          <div class="card-header-flex" style="margin-bottom:0;">
-            <div class="card-title">🎯 I Miei Obiettivi</div>
-            <button class="btn btn-accent btn-sm" onclick="openGoalModal()">➕ Nuovo Obiettivo</button>
-          </div>
-        </div>
-
-        <div id="goalsListContainer" class="goals-list">
-          <!-- Lista Obiettivi Generata Dinamicamente -->
-        </div>
-      </section>
-
-      <!-- SEZIONE 3: STEMMI -->
-      <section id="sec-badges" class="section-view">
-        <div class="card">
-          <div class="card-title">🏆 Stemmi da Sbloccare</div>
-          <p style="font-size:0.85rem; color:var(--subtext); margin-top:4px;">Raggiungi i traguardi per sbloccare tutti i trofei!</p>
-          
-          <div class="badges-grid" id="badgesContainer">
-            <!-- Generati via JS -->
-          </div>
-        </div>
-      </section>
-
-      <!-- SEZIONE 4: ATTIVITÀ & STREAK -->
-      <section id="sec-activity" class="section-view">
-        <div class="card streak-card">
-          <div class="streak-header">
-            <div class="streak-count-box">
-              <span class="streak-flame">🔥</span>
-              <div>
-                <div class="streak-number" id="streakDaysDisplay">0 Giorni</div>
-                <div class="streak-subtext" id="streakSubtext">Registra un'attività oggi!</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Disposizione su 2 Colonne su PC -->
-        <div class="desktop-grid-2">
-          <div class="card">
-            <div class="card-title">📊 Ripartizione Spese</div>
-            <div class="chart-container">
-              <canvas id="categoryChart"></canvas>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-title" style="margin-bottom:12px;">📜 Cronologia</div>
-            <div style="margin-bottom: 12px;">
-              <select id="filterSelect" onchange="loadTransactions()">
-                <option value="all">Tutti i movimenti</option>
-                <option value="income">Solo Entrate</option>
-                <option value="expense">Solo Uscite</option>
-              </select>
-            </div>
-            <ul class="tx-list" id="txList"></ul>
-          </div>
-        </div>
-      </section>
-
-      <!-- SEZIONE 5: IMPOSTAZIONI & TEMI -->
-      <section id="sec-settings" class="section-view">
-        <div class="desktop-grid-2">
-          <div class="card">
-            <div class="card-title">Personalizzazione Tema</div>
-            <p style="font-size:0.85rem; color:var(--subtext); margin-top:4px;">Scegli il tuo colore preferito:</p>
-            
-            <div class="color-picker-grid">
-              <div class="color-dot active" style="background:#4F46E5;" title="Indaco" onclick="setTheme('theme-indigo', this)"></div>
-              <div class="color-dot" style="background:#059669;" title="Smeraldo" onclick="setTheme('theme-emerald', this)"></div>
-              <div class="color-dot" style="background:#7C3AED;" title="Viola" onclick="setTheme('theme-purple', this)"></div>
-              <div class="color-dot" style="background:#E11D48;" title="Rosa Cemento" onclick="setTheme('theme-rose', this)"></div>
-              <div class="color-dot" style="background:#EA580C;" title="Arancione" onclick="setTheme('theme-orange', this)"></div>
-              <div class="color-dot" style="background:#0891B2;" title="Turchese" onclick="setTheme('theme-cyan', this)"></div>
-              <div class="color-dot" style="background:#DB2777;" title="Fucsia" onclick="setTheme('theme-pink', this)"></div>
-              <div class="color-dot" style="background:#D97706;" title="Ambra" onclick="setTheme('theme-amber', this)"></div>
-            </div>
-
-            <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
-
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-weight:600; font-size:0.95rem;">Tema Scuro (Dark Mode)</span>
-              <button class="btn btn-neutral btn-sm" onclick="toggleDarkMode()">Attiva/Disattiva</button>
-            </div>
-          </div>
-
-          <div class="card" style="display: flex; flex-direction: column; gap: 14px;">
-            <div class="card-title">Backup Dati</div>
-            <p style="font-size:0.85rem; color:var(--subtext);">
-              I tuoi dati sono salvati al sicuro all'interno del browser del tuo PC.
-            </p>
-
-            <button class="btn btn-neutral" onclick="exportData()">📥 Esporta Backup (JSON)</button>
-            
-            <label class="btn btn-neutral" style="margin-bottom:0; text-align:center;">
-              📤 Importa Backup
-              <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-            </label>
-
-            <hr style="border:0; border-top:1px solid var(--border); margin: 6px 0;">
-            
-            <button class="btn btn-danger" onclick="clearAllData()">🗑️ Cancella Tutti i Dati</button>
-          </div>
-        </div>
-      </section>
-
-    </div>
-  </div>
-
-  <!-- BARRA DI NAVIGAZIONE POSIZIONATA SUL LATO DESTRO PER PC -->
   <nav class="tab-bar">
-    <div class="brand-logo">
-      <span>Pagafà</span>
-    </div>
     <button class="tab-btn active" onclick="switchTab('sec-add', this)">
       <span class="tab-icon">➕</span>
       <span>Aggiungi</span>
@@ -817,16 +637,155 @@
     </button>
   </nav>
 
+  <div class="content-area">
+    
+    <section id="sec-add" class="section-view active">
+      <div class="card">
+        <div class="card-title">Nuovo Movimento</div>
+        
+        <div class="form-group">
+          <label for="desc">Cosa riguarda?</label>
+          <input type="text" id="desc" placeholder="es. Paga settimanale, Gelato..." />
+        </div>
+
+        <div class="form-group">
+          <label for="category">Categoria</label>
+          <select id="category">
+            <option value="🎁 Regalo/Paghetta">🎁 Regalo o Paghetta</option>
+            <option value="🍦 Cibo e Bevande">🍦 Cibo e Bevande</option>
+            <option value="🎮 Giochi e Hobby">🎮 Giochi e Hobby</option>
+            <option value="👕 Abbigliamento e Moda">👕 Abbigliamento e Moda</option>
+            <option value="⚽ Sport e Tempo Libero">⚽ Sport e Tempo Libero</option>
+            <option value="💻 Tecnologia">💻 Tecnologia</option>
+            <option value="🚌 Viaggi e Uscite">🚌 Viaggi e Uscite</option>
+            <option value="📚 Libri e Fumetti">📚 Libri e Fumetti</option>
+            <option value="🎨 Scuola">🎨 Scuola</option>
+            <option value="❤️ Beneficienza">❤️ Beneficienza</option>
+            <option value="⭐ Altro">⭐ Altro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Importo (€)</label>
+          <input type="number" id="amount" step="0.01" inputmode="decimal" placeholder="0.00" />
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-income" onclick="addTransaction('income')">➕ Entrata</button>
+          <button class="btn btn-expense" onclick="addTransaction('expense')">➖ Uscita</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-goals" class="section-view">
+      <div class="card" style="padding:6px 10px;">
+        <div class="card-header-flex" style="margin-bottom:0;">
+          <div class="card-title">🎯 I Miei Traguardi</div>
+          <button class="btn btn-accent btn-sm" onclick="openGoalModal()">➕ Nuovo Obiettivo</button>
+        </div>
+      </div>
+
+      <div id="goalsListContainer" class="goals-list">
+      </div>
+    </section>
+
+    <section id="sec-badges" class="section-view">
+      <div class="card">
+        <div class="card-title">🏆 Stemmi da Sbloccare</div>
+        <p style="font-size:0.65rem; color:var(--subtext); margin-top:1px;">Raggiungi i traguardi per sbloccare tutti i trofei!</p>
+        
+        <div class="badges-grid" id="badgesContainer">
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-activity" class="section-view">
+      <div class="card streak-card">
+        <div class="streak-header">
+          <div class="streak-count-box">
+            <span class="streak-flame">🔥</span>
+            <div>
+              <div class="streak-number" id="streakDaysDisplay">0 Giorni</div>
+              <div class="streak-subtext" id="streakSubtext">Registra un'attività oggi!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Ripartizione Spese</div>
+        <div class="chart-container">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📜 Cronologia</div>
+        <div style="margin-bottom: 6px;">
+          <select id="filterSelect" onchange="loadTransactions()">
+            <option value="all">Tutti i movimenti</option>
+            <option value="income">Solo Entrate</option>
+            <option value="expense">Solo Uscite</option>
+          </select>
+        </div>
+        <ul class="tx-list" id="txList"></ul>
+      </div>
+    </section>
+
+    <section id="sec-settings" class="section-view">
+      <div class="card">
+        <div class="card-title">Personalizzazione Tema</div>
+        <p style="font-size:0.65rem; color:var(--subtext); margin-top:2px;">Scegli il tuo colore preferito:</p>
+        
+        <div class="color-picker-grid">
+          <div class="color-dot active" style="background:#4F46E5;" title="Indaco" onclick="setTheme('theme-indigo', this)"></div>
+          <div class="color-dot" style="background:#059669;" title="Smeraldo" onclick="setTheme('theme-emerald', this)"></div>
+          <div class="color-dot" style="background:#7C3AED;" title="Viola" onclick="setTheme('theme-purple', this)"></div>
+          <div class="color-dot" style="background:#E11D48;" title="Rosa Cemento" onclick="setTheme('theme-rose', this)"></div>
+          <div class="color-dot" style="background:#EA580C;" title="Arancione" onclick="setTheme('theme-orange', this)"></div>
+          <div class="color-dot" style="background:#0891B2;" title="Turchese" onclick="setTheme('theme-cyan', this)"></div>
+          <div class="color-dot" style="background:#DB2777;" title="Fucsia" onclick="setTheme('theme-pink', this)"></div>
+          <div class="color-dot" style="background:#D97706;" title="Ambra" onclick="setTheme('theme-amber', this)"></div>
+        </div>
+
+        <hr style="border:0; border-top:1px solid var(--border); margin: 8px 0;">
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:600; font-size:0.72rem;">Tema Scuro (Dark Mode)</span>
+          <button class="btn btn-neutral btn-sm" onclick="toggleDarkMode()">Attiva/Disattiva</button>
+        </div>
+      </div>
+
+      <div class="card" style="display: flex; flex-direction: column; gap: 6px;">
+        <div class="card-title">Backup Dati</div>
+        <p style="font-size:0.65rem; color:var(--subtext);">
+          I tuoi dati sono salvati al sicuro nel dispositivo.
+        </p>
+
+        <button class="btn btn-neutral" onclick="exportData()">📥 Esporta Backup (JSON)</button>
+        
+        <label class="btn btn-neutral" style="margin-bottom:0; text-align:center;">
+          📤 Importa Backup
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        </label>
+
+        <hr style="border:0; border-top:1px solid var(--border); margin: 2px 0;">
+        
+        <button class="btn btn-danger" onclick="clearAllData()">🗑️ Cancella Tutti i Dati</button>
+      </div>
+    </section>
+
+  </div>
+
 </div>
 
-<!-- Modal Aggiungi/Modifica Obiettivo -->
 <div class="modal-backdrop" id="goalModal">
   <div class="modal-card">
-    <div class="card-title" style="margin-bottom:14px;" id="modalGoalHeading">Aggiungi Obiettivo</div>
+    <div class="card-title" style="margin-bottom:8px;" id="modalGoalHeading">Aggiungi Obiettivo</div>
     <input type="hidden" id="modalGoalId" value="" />
     <div class="form-group">
       <label for="modalGoalTitle">Cosa desideri?</label>
-      <input type="text" id="modalGoalTitle" placeholder="es. Bicicletta, Libro, Videogioco..." />
+      <input type="text" id="modalGoalTitle" placeholder="es. Bicicletta, Lego..." />
     </div>
     <div class="form-group">
       <label for="modalGoalTarget">Quanto costa? (€)</label>
@@ -848,11 +807,20 @@
 
   const BADGES_CONFIG = [
     { id: 'first_saving', icon: '🌱', title: 'Primi Passi', desc: 'Effettua il tuo primo inserimento', check: (total, count, streak, completedGoals) => count >= 1 },
+    { id: 'count_5', icon: '📝', title: 'Appuntatore', desc: 'Registra almeno 5 movimenti', check: (total, count) => count >= 5 },
+    { id: 'count_20', icon: '📚', title: 'Archivista', desc: 'Registra almeno 20 movimenti', check: (total, count) => count >= 20 },
+    { id: 'count_50', icon: '⚡', title: 'Iperattivo', desc: 'Registra almeno 50 movimenti', check: (total, count) => count >= 50 },
     { id: 'save_20', icon: '🪙', title: 'Primi 20€', desc: 'Raggiungi un saldo di 20€', check: (total) => total >= 20 },
     { id: 'save_50', icon: '💰', title: 'Super 50€', desc: 'Raggiungi un saldo di 50€', check: (total) => total >= 50 },
     { id: 'save_100', icon: '🏦', title: 'Mastro Salvadanaio', desc: 'Raggiungi un saldo di 100€', check: (total) => total >= 100 },
+    { id: 'save_250', icon: '💎', title: 'Cassaforte', desc: 'Raggiungi un saldo di 250€', check: (total) => total >= 250 },
+    { id: 'save_500', icon: '👑', title: 'Re del Risparmio', desc: 'Raggiungi un saldo di 500€', check: (total) => total >= 500 },
     { id: 'goal_reached', icon: '🎉', title: 'Primo Obiettivo!', desc: 'Completa il tuo primo obiettivo', check: (total, count, streak, completedGoals) => completedGoals >= 1 },
-    { id: 'streak_3', icon: '🔥', title: 'Fiamma Viva', desc: 'Mantieni una streak di 3 giorni', check: (total, count, streak) => streak >= 3 }
+    { id: 'goals_3', icon: '🌟', title: 'Tris di Traguardi', desc: 'Completa 3 obiettivi diversi', check: (total, count, streak, completedGoals) => completedGoals >= 3 },
+    { id: 'goals_5', icon: '🚀', title: 'Inarrestabile', desc: 'Completa 5 obiettivi diversi', check: (total, count, streak, completedGoals) => completedGoals >= 5 },
+    { id: 'streak_3', icon: '🔥', title: 'Fiamma Viva', desc: 'Mantieni una streak di 3 giorni', check: (total, count, streak) => streak >= 3 },
+    { id: 'streak_7', icon: '🌋', title: 'Settimana di Fuoco', desc: 'Mantieni una streak di 7 giorni', check: (total, count, streak) => streak >= 7 },
+    { id: 'streak_30', icon: '☄️', title: 'Costanza Suprema', desc: 'Mantieni una streak di 30 giorni', check: (total, count, streak) => streak >= 30 }
   ];
 
   const request = indexedDB.open("SalvadanaioDB_v6", 1);
@@ -941,7 +909,7 @@
     req.onsuccess = () => {
       goalsList = req.result || [];
       if (goalsList.length === 0) {
-        const defaultGoal = { title: "Il mio obiettivo", target: 50 };
+        const defaultGoal = { title: "Bicicletta Nuova", target: 50 };
         const writeTx = db.transaction("goals", "readwrite");
         const addReq = writeTx.objectStore("goals").add(defaultGoal);
         writeTx.oncomplete = () => {
@@ -1255,28 +1223,28 @@
         statusHtml = `<span class="goal-status-badge status-completed">✔️ Completato</span>`;
       } else if (isActive) {
         cardClass += " active-goal";
-        statusHtml = `<span class="goal-status-badge status-active">In Corso</span>`;
+        statusHtml = `<span class="goal-status-badge status-active">🎯 In Corso</span>`;
       } else {
-        statusHtml = `<span class="goal-status-badge status-waiting">In Coda</span>`;
+        statusHtml = `<span class="goal-status-badge status-waiting">⏳ In Coda</span>`;
       }
 
       const card = document.createElement("div");
       card.className = cardClass;
       card.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <strong style="font-size:1.05rem;">${escapeHtml(goal.title)}</strong>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <strong style="font-size:0.8rem;">${escapeHtml(goal.title)}</strong>
             ${statusHtml}
           </div>
-          <div style="display:flex; gap:4px;">
-            <button class="btn-delete" style="width:28px; height:28px; font-size:0.75rem;" onclick="moveGoal(${goal.id}, -1)">⬆</button>
-            <button class="btn-delete" style="width:28px; height:28px; font-size:0.75rem;" onclick="moveGoal(${goal.id}, 1)">⬇</button>
-            <button class="btn-delete" style="width:28px; height:28px; font-size:0.75rem;" onclick="openGoalModal(${goal.id})">✏</button>
-            <button class="btn-delete" style="width:28px; height:28px; font-size:0.75rem;" onclick="deleteGoal(${goal.id}, '${escapeHtml(goal.title)}')">🗑️</button>
+          <div style="display:flex; gap:2px;">
+            <button class="btn-delete" style="width:18px; height:18px; font-size:0.55rem;" onclick="moveGoal(${goal.id}, -1)">⬆️</button>
+            <button class="btn-delete" style="width:18px; height:18px; font-size:0.55rem;" onclick="moveGoal(${goal.id}, 1)">⬇️</button>
+            <button class="btn-delete" style="width:18px; height:18px; font-size:0.55rem;" onclick="openGoalModal(${goal.id})">✏️</button>
+            <button class="btn-delete" style="width:18px; height:18px; font-size:0.55rem;" onclick="deleteGoal(${goal.id}, '${escapeHtml(goal.title)}')">🗑️</button>
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; font-weight:700;">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.7rem; font-weight:700;">
           <span style="color:var(--subtext);">${allocated.toFixed(2)} € di ${goal.target.toFixed(2)} €</span>
           <span style="color:var(--primary);">${percent.toFixed(0)}%</span>
         </div>
@@ -1285,7 +1253,7 @@
           <div class="progress-bar-fill" style="width: ${percent}%;"></div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--subtext); font-weight:600;">
+        <div style="display:flex; justify-content:space-between; font-size:0.62rem; color:var(--subtext); font-weight:600;">
           <span>${isCompleted ? '🎉 Obiettivo raggiunto!' : `Mancano ${remainingForThis.toFixed(2)} €`}</span>
         </div>
       `;
@@ -1344,8 +1312,8 @@
         labels: labels,
         datasets: [{
           data: dataValues,
-          backgroundColor: ['#EF4444', '#F59E0B', '#10B981', '#6366F1', '#EC4899', '#8B5CF6'],
-          borderWidth: 2,
+          backgroundColor: ['#EF4444', '#F59E0B', '#10B981', '#6366F1', '#EC4899', '#8B5CF6', '#0891B2', '#84CC16', '#F97316'],
+          borderWidth: 1.5,
           borderColor: '#ffffff'
         }]
       },
@@ -1355,7 +1323,7 @@
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { font: { family: 'Fredoka', size: 12 }, padding: 12 }
+            labels: { font: { family: 'Fredoka', size: 9 }, padding: 4 }
           }
         }
       }
@@ -1412,20 +1380,20 @@
         }
 
         tx.oncomplete = () => {
-          alert("Backup ripristinato con successo.");
+          alert("Backup ripristinato con successo!");
           loadGoals(() => {
             loadTransactions();
           });
         };
       } catch (err) {
-        alert("File di backup non è valido");
+        alert("File di backup non valido!");
       }
     };
     reader.readAsText(file);
   }
 
   function clearAllData() {
-    if (confirm("Sei sicuro di voler cancellare tutti i dati inseriti? L'azione non è reversibile.")) {
+    if (confirm("Sei sicuro di voler cancellare TUTTI i dati inseriti? L'azione non è reversibile.")) {
       const tx = db.transaction(["transactions", "goals"], "readwrite");
       tx.objectStore("transactions").clear();
       tx.objectStore("goals").clear();
@@ -1433,7 +1401,7 @@
       tx.oncomplete = () => {
         loadGoals(() => {
           loadTransactions();
-          alert("Salvadanaio svuotato con successo.");
+          alert("Salvadanaio svuotato!");
         });
       };
     }
