@@ -48,3 +48,4 @@ Interfaccia pulita e scannabile: Una barra di navigazione inferiore a schede per
 
 Accessibilità immediata: Nessuna registrazione richiesta né server remoti da interrogare. Un singolo file pronto all'uso installabile come PWA (Progressive Web App) per garantire prestazioni veloci e funzionamento offline.
 
+AGGIORNAMENtI LIMITATI IN VERSIONE DESKTOP: RICHIEDERE I NECESSARI VIA EMAIL
